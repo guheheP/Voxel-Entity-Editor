@@ -70,6 +70,36 @@ ui.onCameraReset = () => {
   engine.resetCamera();
 };
 
+ui.onJsonImport = (def) => {
+  // Add to registry and select it
+  entityRegistry.push(def);
+  ui.setEntities(entityRegistry.map(d => ({ name: d.name, type: d.type })));
+  spawnEntity(entityRegistry.length - 1);
+};
+
+// ===== Drag & Drop JSON Import =====
+window.addEventListener('dragover', (e) => {
+  e.preventDefault(); // Prevent default to allow drop
+});
+
+window.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.json')) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const def = JSON.parse(ev.target.result);
+        ui.onJsonImport(def);
+      } catch (err) {
+        console.error('JSON parse error:', err);
+        alert('Failed to parse JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  }
+});
+
 // ===== Spawn initial entity =====
 spawnEntity(0);
 

@@ -7,6 +7,7 @@ export class ControlPanel {
     this.onAnimationSelect = null;
     this.onEntitySelect = null;
     this.onCameraReset = null;
+    this.onJsonImport = null;
     this._currentAnimBtn = null;
     this._currentEntityBtn = null;
 
@@ -30,6 +31,38 @@ export class ControlPanel {
     this.entityPanel = document.createElement('div');
     this.entityPanel.className = 'side-panel';
     this.entityPanel.innerHTML = '<h3>Entities</h3>';
+
+    // File Import Button
+    const importBtn = document.createElement('button');
+    importBtn.className = 'btn';
+    importBtn.style.width = '100%';
+    importBtn.style.marginBottom = '12px';
+    importBtn.style.background = 'var(--accent, #4a7abf)';
+    importBtn.style.color = '#fff';
+    importBtn.innerHTML = '📂 Import JSON';
+    importBtn.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const def = JSON.parse(ev.target.result);
+            if (this.onJsonImport) this.onJsonImport(def);
+          } catch (err) {
+            console.error('JSON parse error:', err);
+            alert('Failed to parse JSON file.');
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    });
+    this.entityPanel.appendChild(importBtn);
+
     this.entityList = document.createElement('div');
     this.entityList.className = 'entity-list';
     this.entityPanel.appendChild(this.entityList);
