@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Voxel Map Editor - ボクセルマップエディター" />
+  <title>Voxel Map Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/editor/editor-styles.css" />
+  <link rel="stylesheet" href="/src/map-editor/map-ui.css" />
+</head>
+<body>
+  <div id="editor-root" style="grid-template-areas: 'header header header' 'tools viewport properties'; grid-template-rows: var(--header-h) 1fr;">
+    
+    <!-- Top Header -->
+    <header id="editor-header">
+      <div class="header-title">🗺️ Map Editor</div>
+      <div class="header-divider"></div>
+      
+      <!-- Mode Toggles -->
+      <button class="header-btn primary mode-btn active" data-mode="terrain">🎨 Terrain Mode</button>
+      <button class="header-btn mode-btn" data-mode="object">📦 Objects Mode</button>
+      
+      <div class="header-spacer"></div>
+      
+      <button class="header-btn" id="btn-import-map">📂 Import JSON</button>
+      <button class="header-btn primary" id="btn-export-map">💾 Export JSON</button>
+      <input type="file" id="file-import" accept=".json" style="display: none;" />
+      <a href="/" class="header-link">↩ Back to Main</a>
+    </header>
+
+    <!-- Left Toolbar (Tools) -->
+    <aside id="panel-tools">
+      <div class="panel-section">
+        <div class="panel-section-title">Tools</div>
+        <div class="tool-grid" id="terrain-tools">
+          <button class="tool-btn active" data-tool="build-terrain" title="Build (B)">🧱 Build</button>
+          <button class="tool-btn" data-tool="erase-terrain" title="Erase (E)">🔨 Erase</button>
+        </div>
+        <div class="tool-grid" id="object-tools" style="display: none;">
+          <button class="tool-btn active" data-tool="place-object" title="Place (P)">📦 Place</button>
+          <button class="tool-btn" data-tool="select-object" title="Select (S)">👆 Select</button>
+        </div>
+      </div>
+      
+      <hr style="border:0; border-top:1px solid var(--border); margin: 16px 0;" />
+      
+      <!-- Terrain Settings -->
+      <div id="terrain-settings">
+        <div class="panel-section">
+          <div class="panel-section-title">Brush Size</div>
+          <div class="input-row">
+            <span class="input-label" style="width:auto">Size</span>
+            <input type="range" id="brush-size" min="1" max="9" step="2" value="1" style="flex:1" />
+            <span id="brush-size-val" class="input-num" style="width:24px; text-align:center">1</span>
+          </div>
+        </div>
+        
+        <div class="panel-section">
+          <div class="panel-section-title">Terrain Palette</div>
+          <div class="palette-grid" id="main-palette"></div>
+          <button class="sm-btn" id="btn-add-color" style="margin-top:8px; width:100%">+ Add Color</button>
+        </div>
+      </div>
+
+      <!-- Object Settings -->
+      <div id="object-settings" style="display: none;">
+        <div class="panel-section">
+          <div class="panel-section-title">Selected Preset</div>
+          <div id="sel-preset-name" style="color: var(--accent); font-size: 13px; font-weight: 500; word-break: break-all;">- None -</div>
+        </div>
+        
+        <div class="panel-section">
+          <div class="panel-section-title">Library</div>
+          <div id="presets-accordion" class="accordion"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main id="panel-viewport">
+      <div id="canvas-container"></div>
+    </main>
+
+    <!-- Right Properties Panel -->
+    <aside id="panel-properties">
+      <div class="panel-section">
+        <div class="panel-section-title">Map Properties</div>
+        <div class="input-row">
+          <span class="input-label">W</span>
+          <input type="number" id="map-size-x" class="input-num" value="32" min="16" max="128" step="16" />
+        </div>
+        <div class="input-row">
+          <span class="input-label">D</span>
+          <input type="number" id="map-size-z" class="input-num" value="32" min="16" max="128" step="16" />
+        </div>
+        <button class="sm-btn" id="btn-resize-map" style="width:100%; margin-top:10px;">Apply Resize</button>
+      </div>
+    </aside>
+
+  </div>
+
+  <script type="module" src="/src/map-editor/map-main.js"></script>
+</body>
+</html>

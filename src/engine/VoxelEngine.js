@@ -105,8 +105,9 @@ export class VoxelEngine {
   }
 
   _onResize() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const container = this.canvas.parentElement || document.body;
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
