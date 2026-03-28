@@ -2,32 +2,19 @@ import { VoxelEngine } from './engine/VoxelEngine.js';
 import { VoxelEntity } from './engine/VoxelEntity.js';
 import { ControlPanel } from './ui/ControlPanel.js';
 
-// Entity & Object definitions
-import { humanoidDef } from './data/entities/humanoid.js';
-import { catDef } from './data/entities/cat.js';
-import { houseDef } from './data/objects/house.js';
-import { streetLightDef } from './data/objects/streetLight.js';
-import { fenceDef } from './data/objects/fence.js';
-
-// ===== Registry of all available entity definitions =====
-const entityRegistry = [
-  humanoidDef,
-  catDef,
-  houseDef,
-  streetLightDef,
-  fenceDef,
-];
-
 // ===== Initialize Engine =====
 const canvas = document.getElementById('voxel-canvas');
 const engine = new VoxelEngine(canvas);
 
+// ===== UI Setup =====
+const overlay = document.getElementById('ui-overlay');
+const ui = new ControlPanel(overlay);
+
 // ===== State =====
 let currentEntity = null;
-let currentDefIndex = 0;
 
 // ===== Functions =====
-function spawnEntity(defIndex) {
+function spawnEntity(def) {
   // Remove current entity if exists
   if (currentEntity) {
     engine.removeEntity(currentEntity);
@@ -35,7 +22,6 @@ function spawnEntity(defIndex) {
     currentEntity = null;
   }
 
-  const def = entityRegistry[defIndex];
   currentEntity = new VoxelEntity(def);
   engine.addEntity(currentEntity);
 
@@ -47,17 +33,16 @@ function spawnEntity(defIndex) {
 
   // Update UI
   ui.setAnimations(animNames);
-  currentDefIndex = defIndex;
 }
 
-// ===== UI Setup =====
-const overlay = document.getElementById('ui-overlay');
-const ui = new ControlPanel(overlay);
-
-ui.setEntities(entityRegistry.map(d => ({ name: d.name, type: d.type })));
-
-ui.onEntitySelect = (index) => {
-  spawnEntity(index);
+ui.onEntityFetch = async (url) => {
+  try {
+    const res = await fetch(url);
+    const def = await res.json();
+    spawnEntity(def);
+  } catch (err) {
+    console.error('Failed to load entity:', err);
+  }
 };
 
 ui.onAnimationSelect = (name) => {
@@ -71,10 +56,7 @@ ui.onCameraReset = () => {
 };
 
 ui.onJsonImport = (def) => {
-  // Add to registry and select it
-  entityRegistry.push(def);
-  ui.setEntities(entityRegistry.map(d => ({ name: d.name, type: d.type })));
-  spawnEntity(entityRegistry.length - 1);
+  spawnEntity(def);
 };
 
 // ===== Drag & Drop JSON Import =====
@@ -100,8 +82,19 @@ window.addEventListener('drop', (e) => {
   }
 });
 
-// ===== Spawn initial entity =====
-spawnEntity(0);
+// ===== Load Presets & Start =====
+async function loadPresets() {
+  try {
+    const res = await fetch('/presets.json');
+    const groups = await res.json();
+    ui.setEntities(groups);
+    if (groups.length > 0 && groups[0].items.length > 0) {
+      ui.onEntityFetch(groups[0].items[0].url);
+    }
+  } catch(err) {
+    console.error('Failed to load presets manifest', err);
+  }
+}
 
-// ===== Start render loop =====
+loadPresets();
 engine.start();

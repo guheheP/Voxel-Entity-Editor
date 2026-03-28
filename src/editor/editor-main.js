@@ -11,20 +11,7 @@ import { VoxelEntity } from '../engine/VoxelEntity.js';
 import { EditorState } from './EditorState.js';
 import { EditorTools } from './tools/EditorTools.js';
 
-// Import preset entities for the "Load Preset" menu
-import { humanoidDef } from '../data/entities/humanoid.js';
-import { catDef } from '../data/entities/cat.js';
-import { houseDef } from '../data/objects/house.js';
-import { streetLightDef } from '../data/objects/streetLight.js';
-import { fenceDef } from '../data/objects/fence.js';
 
-const presets = [
-  { label: '🧑 Chibi Human', def: humanoidDef },
-  { label: '🐾 Cat', def: catDef },
-  { label: '🏠 House', def: houseDef },
-  { label: '💡 Street Light', def: streetLightDef },
-  { label: '🪵 Fence', def: fenceDef },
-];
 
 // ===== State =====
 const state = new EditorState();
@@ -256,7 +243,6 @@ function buildHeader() {
     <button class="header-btn" id="btn-new">✨ New</button>
     <select class="input-select" id="preset-select" style="width:160px;font-size:12px;">
       <option value="">📦 Load Preset...</option>
-      ${presets.map((p, i) => `<option value="${i}">${p.label}</option>`).join('')}
     </select>
     <div class="header-divider"></div>
     <button class="header-btn" id="btn-import">📂 Import</button>
@@ -269,9 +255,17 @@ function buildHeader() {
   `;
 
   document.getElementById('btn-new').addEventListener('click', () => state.newEntity());
-  document.getElementById('preset-select').addEventListener('change', (e) => {
-    const idx = parseInt(e.target.value);
-    if (!isNaN(idx)) state.loadEntity(presets[idx].def);
+  document.getElementById('preset-select').addEventListener('change', async (e) => {
+    const url = e.target.value;
+    if (url) {
+      try {
+        const res = await fetch(url);
+        const def = await res.json();
+        state.loadEntity(def);
+      } catch (err) {
+        console.error('Failed to load preset:', err);
+      }
+    }
     e.target.value = '';
   });
   document.getElementById('btn-undo').addEventListener('click', () => state.undo());
@@ -1123,13 +1117,32 @@ buildPropertiesPanel();
 buildTimelinePanel();
 onResize();
 
-// Try to restore from autosave, fallback to default
+// Load dynamic presets into the select dropdown
+fetch('/presets.json')
+  .then(res => res.json())
+  .then(groups => {
+    const select = document.getElementById('preset-select');
+    groups.forEach(group => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = group.genre;
+      group.items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.url;
+        option.textContent = item.label;
+        optgroup.appendChild(option);
+      });
+      select.appendChild(optgroup);
+    });
+  })
+  .catch(err => console.error('Failed to load presets for dropdown', err));
+
+// Try to restore from autosave, fallback to empty
 const restored = loadFromLocalStorage();
 if (restored) {
   console.log('[AutoSave] Restored entity:', restored.name);
   state.loadEntity(restored);
 } else {
-  state.loadEntity(humanoidDef);
+  state.newEntity();
 }
 
 // Initialize editor tools (raycasting & paint/erase/fill/select)

@@ -1,0 +1,177 @@
+[
+  {
+    "genre": "RPG Characters",
+    "items": [
+      {
+        "label": "🧑 Chibi Human",
+        "name": "Chibi Human",
+        "type": "humanoid",
+        "url": "/presets/RPG_Characters/Chibi%20Human.json"
+      },
+      {
+        "label": "🐾 Cat",
+        "name": "Cat",
+        "type": "quadruped",
+        "url": "/presets/RPG_Characters/Cat.json"
+      },
+      {
+        "label": "🐕 Dog",
+        "name": "Dog",
+        "type": "quadruped",
+        "url": "/presets/RPG_Characters/Dog.json"
+      },
+      {
+        "label": "⚔️ Knight",
+        "name": "Knight",
+        "type": "humanoid",
+        "url": "/presets/RPG_Characters/Knight.json"
+      },
+      {
+        "label": "💀 Skeleton",
+        "name": "Skeleton",
+        "type": "humanoid",
+        "url": "/presets/RPG_Characters/Skeleton.json"
+      },
+      {
+        "label": "💧 Slime",
+        "name": "Slime",
+        "type": "static",
+        "url": "/presets/RPG_Characters/Slime.json"
+      },
+      {
+        "label": "🐦 Bird",
+        "name": "Bird",
+        "type": "quadruped",
+        "url": "/presets/RPG_Characters/Bird.json"
+      }
+    ]
+  },
+  {
+    "genre": "RPG Props",
+    "items": [
+      {
+        "label": "🏠 House",
+        "name": "House",
+        "type": "static",
+        "url": "/presets/RPG_Props/House.json"
+      },
+      {
+        "label": "💡 Street Light",
+        "name": "Street Light",
+        "type": "static",
+        "url": "/presets/RPG_Props/Street%20Light.json"
+      },
+      {
+        "label": "🪵 Fence",
+        "name": "Fence",
+        "type": "static",
+        "url": "/presets/RPG_Props/Fence.json"
+      },
+      {
+        "label": "🌳 Tree",
+        "name": "Tree",
+        "type": "static",
+        "url": "/presets/RPG_Props/Tree.json"
+      },
+      {
+        "label": "🌲 Pine Tree",
+        "name": "Pine Tree",
+        "type": "static",
+        "url": "/presets/RPG_Props/Pine%20Tree.json"
+      },
+      {
+        "label": "🧰 Chest",
+        "name": "Chest",
+        "type": "static",
+        "url": "/presets/RPG_Props/Chest.json"
+      },
+      {
+        "label": "🛢️ Barrel",
+        "name": "Barrel",
+        "type": "static",
+        "url": "/presets/RPG_Props/Barrel.json"
+      },
+      {
+        "label": "🔥 Campfire",
+        "name": "Campfire",
+        "type": "static",
+        "url": "/presets/RPG_Props/Campfire.json"
+      },
+      {
+        "label": "🪨 Rock",
+        "name": "Rock",
+        "type": "static",
+        "url": "/presets/RPG_Props/Rock.json"
+      }
+    ]
+  },
+  {
+    "genre": "TD Towers",
+    "items": [
+      {
+        "label": "🏹 Arrow Tower",
+        "name": "Arrow Tower",
+        "type": "static",
+        "url": "/presets/TD_Towers/Arrow%20Tower.json"
+      },
+      {
+        "label": "💣 Cannon Tower",
+        "name": "Cannon Tower",
+        "type": "static",
+        "url": "/presets/TD_Towers/Cannon%20Tower.json"
+      },
+      {
+        "label": "🔮 Magic Tower",
+        "name": "Magic Tower",
+        "type": "static",
+        "url": "/presets/TD_Towers/Magic%20Tower.json"
+      }
+    ]
+  },
+  {
+    "genre": "TD Enemies",
+    "items": [
+      {
+        "label": "🟢 Goblin",
+        "name": "Goblin",
+        "type": "humanoid",
+        "url": "/presets/TD_Enemies/Goblin.json"
+      },
+      {
+        "label": "🧌 Orc",
+        "name": "Orc",
+        "type": "humanoid",
+        "url": "/presets/TD_Enemies/Orc.json"
+      },
+      {
+        "label": "🦇 Gargoyle",
+        "name": "Gargoyle",
+        "type": "quadruped",
+        "url": "/presets/TD_Enemies/Gargoyle.json"
+      }
+    ]
+  },
+  {
+    "genre": "TD Bases & Traps",
+    "items": [
+      {
+        "label": "🏰 Castle Base",
+        "name": "Castle Base",
+        "type": "static",
+        "url": "/presets/TD_Bases_and_Traps/Castle%20Base.json"
+      },
+      {
+        "label": "🚧 Barricade",
+        "name": "Barricade",
+        "type": "static",
+        "url": "/presets/TD_Bases_and_Traps/Barricade.json"
+      },
+      {
+        "label": "💰 Gold Mine",
+        "name": "Gold Mine",
+        "type": "static",
+        "url": "/presets/TD_Bases_and_Traps/Gold%20Mine.json"
+      }
+    ]
+  }
+]

@@ -77,28 +77,42 @@ export class ControlPanel {
   }
 
   /**
-   * Set the list of available entities.
-   * @param {Array<{name: string, type: string}>} entities
+   * Set the categorized list of available entities.
+   * @param {Array<{genre: string, items: Array}>} groups
    */
-  setEntities(entities) {
+  setEntities(groups) {
     this.entityList.innerHTML = '';
-    entities.forEach((e, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'entity-btn';
-      btn.id = `entity-btn-${i}`;
-      const icon = e.type === 'humanoid' ? '🧑' : e.type === 'quadruped' ? '🐾' : '🏗️';
-      btn.textContent = `${icon}  ${e.name}`;
-      btn.addEventListener('click', () => {
-        if (this._currentEntityBtn) this._currentEntityBtn.classList.remove('active');
-        btn.classList.add('active');
-        this._currentEntityBtn = btn;
-        if (this.onEntitySelect) this.onEntitySelect(i);
+    this._currentEntityBtn = null;
+
+    groups.forEach((group, groupIdx) => {
+      const header = document.createElement('div');
+      header.textContent = group.genre;
+      header.style.margin = '16px 0 8px 6px';
+      header.style.color = 'var(--text-muted)';
+      header.style.fontSize = '12px';
+      header.style.fontWeight = 'bold';
+      header.style.textTransform = 'uppercase';
+      header.style.letterSpacing = '1px';
+      this.entityList.appendChild(header);
+
+      group.items.forEach((item, itemIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'entity-btn';
+        btn.textContent = item.label;
+        btn.addEventListener('click', () => {
+          if (this._currentEntityBtn) this._currentEntityBtn.classList.remove('active');
+          btn.classList.add('active');
+          this._currentEntityBtn = btn;
+          if (this.onEntityFetch) this.onEntityFetch(item.url);
+        });
+
+        if (groupIdx === 0 && itemIdx === 0) {
+          btn.classList.add('active');
+          this._currentEntityBtn = btn;
+        }
+
+        this.entityList.appendChild(btn);
       });
-      if (i === 0) {
-        btn.classList.add('active');
-        this._currentEntityBtn = btn;
-      }
-      this.entityList.appendChild(btn);
     });
   }
 
