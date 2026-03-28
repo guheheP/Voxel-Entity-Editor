@@ -4,6 +4,10 @@ import { AnimationController } from './AnimationController.js';
 /**
  * VoxelEntity - Renders a voxel entity from a data definition.
  *
+ * Uses InstancedMesh to batch voxels by color, dramatically reducing
+ * draw calls. Each color group is a single InstancedMesh with per-instance
+ * transforms. Voxel metadata is stored for raycasting support.
+ *
  * Entity definition schema:
  * {
  *   name: string,
@@ -39,12 +43,11 @@ export class VoxelEntity {
       });
     });
 
-    // Shared geometry
+    // Shared geometry (slightly smaller for voxel gap effect)
     const s = this.voxelSize;
     this.boxGeom = new THREE.BoxGeometry(s * 0.98, s * 0.98, s * 0.98);
 
-    // Edge material for voxel outlines
-    this.edgeGeom = new THREE.EdgesGeometry(new THREE.BoxGeometry(s, s, s));
+    // Edge material for voxel outlines (shared)
     this.edgeMat = new THREE.LineBasicMaterial({
       color: 0x000000,
       transparent: true,
@@ -96,35 +99,73 @@ export class VoxelEntity {
     }
   }
 
+  /**
+   * Add voxel meshes using InstancedMesh for batching.
+   * Groups voxels by color index, creates one InstancedMesh per color.
+   * Also adds subtle edge lines per voxel.
+   */
   _addVoxelMeshes(group, partDef) {
     const s = this.voxelSize;
     const cx = partDef.center[0];
     const cy = partDef.center[1];
     const cz = partDef.center[2];
 
+    // Group voxels by color index
+    const colorBuckets = new Map(); // colorIndex -> [{vx, vy, vz, idx}]
     for (let i = 0; i < partDef.voxels.length; i++) {
       const [vx, vy, vz, ci] = partDef.voxels[i];
       if (ci < 0 || ci >= this.materials.length) continue;
-      const mesh = new THREE.Mesh(this.boxGeom, this.materials[ci]);
-      mesh.position.set(
-        (vx - cx + 0.5) * s,
-        (vy - cy + 0.5) * s,
-        (vz - cz + 0.5) * s
-      );
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      // Store voxel metadata for raycasting
-      mesh.userData.isVoxel = true;
-      mesh.userData.partName = partDef.name;
-      mesh.userData.voxelCoord = [vx, vy, vz];
-      mesh.userData.colorIndex = ci;
-      group.add(mesh);
-
-      // Subtle edge lines
-      const edges = new THREE.LineSegments(this.edgeGeom, this.edgeMat);
-      edges.position.copy(mesh.position);
-      group.add(edges);
+      if (!colorBuckets.has(ci)) colorBuckets.set(ci, []);
+      colorBuckets.get(ci).push({ vx, vy, vz, origIdx: i });
     }
+
+    const dummy = new THREE.Object3D();
+    const edgeGeom = new THREE.EdgesGeometry(new THREE.BoxGeometry(s, s, s));
+
+    for (const [ci, bucket] of colorBuckets) {
+      // Create InstancedMesh for this color group
+      const instancedMesh = new THREE.InstancedMesh(
+        this.boxGeom,
+        this.materials[ci],
+        bucket.length
+      );
+      instancedMesh.castShadow = true;
+      instancedMesh.receiveShadow = true;
+
+      // Store metadata for raycasting
+      instancedMesh.userData.isVoxelBatch = true;
+      instancedMesh.userData.partName = partDef.name;
+      instancedMesh.userData.colorIndex = ci;
+      instancedMesh.userData.voxelMap = []; // instanceId -> {coord, origIdx}
+
+      for (let i = 0; i < bucket.length; i++) {
+        const { vx, vy, vz, origIdx } = bucket[i];
+        const px = (vx - cx + 0.5) * s;
+        const py = (vy - cy + 0.5) * s;
+        const pz = (vz - cz + 0.5) * s;
+
+        dummy.position.set(px, py, pz);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+
+        // Store mapping from instanceId to voxel coordinate
+        instancedMesh.userData.voxelMap[i] = {
+          coord: [vx, vy, vz],
+          origIdx,
+        };
+
+        // Add edge lines (these are lightweight LineSegments, not meshes)
+        const edges = new THREE.LineSegments(edgeGeom, this.edgeMat);
+        edges.position.set(px, py, pz);
+        group.add(edges);
+      }
+
+      instancedMesh.instanceMatrix.needsUpdate = true;
+      group.add(instancedMesh);
+    }
+
+    // Store edge geometry reference for disposal
+    group.userData._edgeGeom = edgeGeom;
   }
 
   /** Rebuild a single part's meshes (for editor updates). */
@@ -134,26 +175,50 @@ export class VoxelEntity {
     const partDef = this.definition.parts.find(p => p.name === partName);
     if (!partDef) return;
 
-    // Remove all children
-    while (group.children.length) {
-      group.remove(group.children[0]);
+    // Dispose edge geometry stored on the group
+    if (group.userData._edgeGeom) {
+      group.userData._edgeGeom.dispose();
     }
 
-    // Update materials if palette changed
-    while (this.materials.length < this.definition.palette.length) {
-      this.materials.push(new THREE.MeshLambertMaterial({
-        color: new THREE.Color(this.definition.palette[this.materials.length]),
-      }));
+    // Remove and dispose all children to prevent GPU memory leaks
+    const children = [...group.children];
+    for (const child of children) {
+      group.remove(child);
+      // Dispose InstancedMesh or LineSegments
+      if (child.isInstancedMesh) {
+        // Don't dispose shared boxGeom or shared materials
+        child.dispose(); // disposes instance data
+      }
+      if (child.geometry && child.geometry !== this.boxGeom) {
+        child.geometry.dispose();
+      }
+      if (child.material && child.material !== this.edgeMat && !this.materials.includes(child.material)) {
+        child.material.dispose();
+      }
+    }
+
+    // Sync all materials with palette (handle color changes and additions)
+    for (let i = 0; i < this.definition.palette.length; i++) {
+      if (i < this.materials.length) {
+        this.materials[i].color.set(this.definition.palette[i]);
+      } else {
+        this.materials.push(new THREE.MeshLambertMaterial({
+          color: new THREE.Color(this.definition.palette[i]),
+        }));
+      }
     }
 
     this._addVoxelMeshes(group, partDef);
   }
 
-  /** Get all voxel Mesh objects (for raycasting). */
+  /**
+   * Get all raycastable objects (InstancedMesh instances).
+   * Returns objects that support raycasting with instanceId.
+   */
   getVoxelMeshes() {
     const meshes = [];
     this.root.traverse((obj) => {
-      if (obj.isMesh && obj.userData.isVoxel) {
+      if (obj.isInstancedMesh && obj.userData.isVoxelBatch) {
         meshes.push(obj);
       }
     });
@@ -182,7 +247,6 @@ export class VoxelEntity {
       const group = this.partGroups[partName];
       if (!group) continue;
 
-      // Apply rotation
       if (transform.rotation) {
         group.rotation.set(
           transform.rotation[0],
@@ -191,7 +255,6 @@ export class VoxelEntity {
         );
       }
 
-      // Apply position offset from rest position
       if (transform.position) {
         const rest = group.userData.restPosition;
         group.position.set(
@@ -215,8 +278,15 @@ export class VoxelEntity {
 
   /** Dispose of all GPU resources */
   dispose() {
+    this.root.traverse((obj) => {
+      if (obj.isInstancedMesh) {
+        obj.dispose();
+      }
+      if (obj.geometry && obj.geometry !== this.boxGeom) {
+        obj.geometry.dispose();
+      }
+    });
     this.boxGeom.dispose();
-    this.edgeGeom.dispose();
     this.edgeMat.dispose();
     this.materials.forEach(m => m.dispose());
   }

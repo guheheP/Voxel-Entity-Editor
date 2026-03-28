@@ -29,6 +29,12 @@ export class EditorTools {
       opacity: 0.35,
       depthTest: true,
     });
+    this.cursorFillMat = new THREE.MeshBasicMaterial({
+      color: 0x3fb950,
+      transparent: true,
+      opacity: 0.4,
+      depthTest: true,
+    });
     this.cursorGeom = new THREE.BoxGeometry(1, 1, 1);
     this.cursor = new THREE.Mesh(this.cursorGeom, this.cursorMat);
     this.cursor.visible = false;
@@ -124,6 +130,12 @@ export class EditorTools {
         this.mirrorCursor.visible = false;
       }
       if (this._painting) this._doPaint(hit);
+    } else if (tool === 'fill') {
+      // Show cursor on existing voxel (fill target)
+      this._positionCursorAtVoxel(this.cursor, hit.partName, hit.voxelCoord, s, entity);
+      this.cursor.material = this.cursorFillMat;
+      this.cursor.visible = true;
+      this.mirrorCursor.visible = false;
     } else {
       // select
       this.cursor.visible = false;
@@ -146,6 +158,8 @@ export class EditorTools {
       this._doErase(hit);
     } else if (tool === 'paint') {
       this._doPaint(hit);
+    } else if (tool === 'fill') {
+      this._doFill(hit);
     } else if (tool === 'select') {
       this.state.selectPart(hit.partName);
     }
@@ -191,6 +205,83 @@ export class EditorTools {
         this.state.recolorVoxel(hit.partName, mirror[0], mirror[1], mirror[2], this.state.selectedColor);
       }
     }
+  }
+
+  /**
+   * Flood-fill connected voxels of the same color with the selected color.
+   * Uses BFS to find all connected voxels (6-connected: face-adjacent).
+   */
+  _doFill(hit) {
+    const partDef = this.state.getPartDef(hit.partName);
+    if (!partDef) return;
+
+    const targetColor = hit.colorIndex;
+    const newColor = this.state.selectedColor;
+    if (targetColor === newColor) return; // No change needed
+
+    // Build a spatial index for fast neighbor lookup
+    const voxelMap = new Map();
+    for (let i = 0; i < partDef.voxels.length; i++) {
+      const [vx, vy, vz, ci] = partDef.voxels[i];
+      voxelMap.set(`${vx},${vy},${vz}`, { idx: i, ci });
+    }
+
+    // BFS from the hit voxel
+    const startKey = `${hit.voxelCoord[0]},${hit.voxelCoord[1]},${hit.voxelCoord[2]}`;
+    const visited = new Set();
+    const toRecolor = [];
+    const queue = [startKey];
+    visited.add(startKey);
+
+    const directions = [
+      [1, 0, 0], [-1, 0, 0],
+      [0, 1, 0], [0, -1, 0],
+      [0, 0, 1], [0, 0, -1],
+    ];
+
+    while (queue.length > 0) {
+      const key = queue.shift();
+      const entry = voxelMap.get(key);
+      if (!entry || entry.ci !== targetColor) continue;
+
+      toRecolor.push(key);
+
+      const [cx, cy, cz] = key.split(',').map(Number);
+      for (const [dx, dy, dz] of directions) {
+        const nk = `${cx + dx},${cy + dy},${cz + dz}`;
+        if (!visited.has(nk)) {
+          visited.add(nk);
+          const neighbor = voxelMap.get(nk);
+          if (neighbor && neighbor.ci === targetColor) {
+            queue.push(nk);
+          }
+        }
+      }
+    }
+
+    if (toRecolor.length === 0) return;
+
+    // Batch recolor using a single undo action
+    const oldColors = toRecolor.map(key => {
+      const entry = voxelMap.get(key);
+      return { key, idx: entry.idx, oldColor: entry.ci };
+    });
+
+    this.state.execute(
+      `Fill ${toRecolor.length} voxels`,
+      () => {
+        for (const { key } of oldColors) {
+          const entry = voxelMap.get(key);
+          if (entry) partDef.voxels[entry.idx][3] = newColor;
+        }
+      },
+      () => {
+        for (const { key, oldColor } of oldColors) {
+          const entry = voxelMap.get(key);
+          if (entry) partDef.voxels[entry.idx][3] = oldColor;
+        }
+      }
+    );
   }
 
   /**
@@ -244,5 +335,6 @@ export class EditorTools {
     this.cursorGeom.dispose();
     this.cursorMat.dispose();
     this.cursorEraseMat.dispose();
+    this.cursorFillMat.dispose();
   }
 }

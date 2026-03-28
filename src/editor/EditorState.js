@@ -193,14 +193,16 @@ export class EditorState {
   addVoxel(partName, x, y, z, colorIndex) {
     const part = this.getPartDef(partName);
     if (!part) return;
-    const key = `${x},${y},${z}`;
     const existing = part.voxels.findIndex(v => v[0] === x && v[1] === y && v[2] === z);
     if (existing >= 0) return; // already exists
 
     this.execute(
       `Add voxel (${x},${y},${z})`,
       () => { part.voxels.push([x, y, z, colorIndex]); },
-      () => { part.voxels.pop(); }
+      () => {
+        const i = part.voxels.findIndex(v => v[0] === x && v[1] === y && v[2] === z);
+        if (i >= 0) part.voxels.splice(i, 1);
+      }
     );
   }
 
@@ -210,11 +212,14 @@ export class EditorState {
     const idx = part.voxels.findIndex(v => v[0] === x && v[1] === y && v[2] === z);
     if (idx < 0) return;
 
-    const removed = part.voxels[idx];
+    const removed = [...part.voxels[idx]];
     this.execute(
       `Remove voxel (${x},${y},${z})`,
-      () => { part.voxels.splice(idx, 1); },
-      () => { part.voxels.splice(idx, 0, removed); }
+      () => {
+        const i = part.voxels.findIndex(v => v[0] === x && v[1] === y && v[2] === z);
+        if (i >= 0) part.voxels.splice(i, 1);
+      },
+      () => { part.voxels.push(removed); }
     );
   }
 

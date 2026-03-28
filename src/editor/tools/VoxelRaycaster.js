@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 /**
  * VoxelRaycaster — Handles raycasting from mouse position to voxel meshes.
+ * Supports both InstancedMesh (batched) and individual Mesh hits.
  * Returns hit info including part name, voxel coord, and adjacent position.
  */
 export class VoxelRaycaster {
@@ -15,8 +16,8 @@ export class VoxelRaycaster {
   /**
    * Cast a ray from mouse position and find the first voxel hit.
    * @param {MouseEvent} event
-   * @param {import('../engine/VoxelEntity.js').VoxelEntity} entity
-   * @returns {null|{mesh, partName, voxelCoord, faceNormal, adjacentCoord}}
+   * @param {import('../../engine/VoxelEntity.js').VoxelEntity} entity
+   * @returns {null|{mesh, partName, voxelCoord, faceNormal, adjacentCoord, colorIndex, point}}
    */
   cast(event, entity) {
     if (!entity) return null;
@@ -33,37 +34,66 @@ export class VoxelRaycaster {
     if (intersects.length === 0) return null;
 
     const hit = intersects[0];
-    const mesh = hit.object;
-    const ud = mesh.userData;
+    const obj = hit.object;
 
-    if (!ud.isVoxel) return null;
+    // Handle InstancedMesh hit
+    if (obj.isInstancedMesh && obj.userData.isVoxelBatch) {
+      const instanceId = hit.instanceId;
+      const voxelMap = obj.userData.voxelMap;
 
-    // Compute face normal in voxel coordinate space
-    // The face normal from Three.js is in world space for the mesh
-    const faceNormal = hit.face.normal.clone();
-    // Transform normal to world space
-    const normalMatrix = new THREE.Matrix3().getNormalMatrix(mesh.matrixWorld);
-    faceNormal.applyMatrix3(normalMatrix).normalize();
+      if (instanceId === undefined || !voxelMap || !voxelMap[instanceId]) return null;
 
-    // Snap to nearest axis
-    const snapped = snapToAxis(faceNormal);
+      const { coord } = voxelMap[instanceId];
 
-    // Adjacent voxel coordinate = hit voxel + snapped normal
-    const adjacentCoord = [
-      ud.voxelCoord[0] + snapped[0],
-      ud.voxelCoord[1] + snapped[1],
-      ud.voxelCoord[2] + snapped[2],
-    ];
+      // Compute face normal
+      const faceNormal = hit.face.normal.clone();
+      const normalMatrix = new THREE.Matrix3().getNormalMatrix(obj.matrixWorld);
+      faceNormal.applyMatrix3(normalMatrix).normalize();
+      const snapped = snapToAxis(faceNormal);
 
-    return {
-      mesh,
-      partName: ud.partName,
-      voxelCoord: [...ud.voxelCoord],
-      colorIndex: ud.colorIndex,
-      faceNormal: snapped,
-      adjacentCoord,
-      point: hit.point.clone(),
-    };
+      const adjacentCoord = [
+        coord[0] + snapped[0],
+        coord[1] + snapped[1],
+        coord[2] + snapped[2],
+      ];
+
+      return {
+        mesh: obj,
+        partName: obj.userData.partName,
+        voxelCoord: [...coord],
+        colorIndex: obj.userData.colorIndex,
+        faceNormal: snapped,
+        adjacentCoord,
+        point: hit.point.clone(),
+      };
+    }
+
+    // Fallback: handle individual Mesh hit (legacy support)
+    if (obj.isMesh && obj.userData.isVoxel) {
+      const ud = obj.userData;
+      const faceNormal = hit.face.normal.clone();
+      const normalMatrix = new THREE.Matrix3().getNormalMatrix(obj.matrixWorld);
+      faceNormal.applyMatrix3(normalMatrix).normalize();
+      const snapped = snapToAxis(faceNormal);
+
+      const adjacentCoord = [
+        ud.voxelCoord[0] + snapped[0],
+        ud.voxelCoord[1] + snapped[1],
+        ud.voxelCoord[2] + snapped[2],
+      ];
+
+      return {
+        mesh: obj,
+        partName: ud.partName,
+        voxelCoord: [...ud.voxelCoord],
+        colorIndex: ud.colorIndex,
+        faceNormal: snapped,
+        adjacentCoord,
+        point: hit.point.clone(),
+      };
+    }
+
+    return null;
   }
 }
 

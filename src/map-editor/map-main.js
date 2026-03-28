@@ -256,7 +256,7 @@ function setTool(toolName) {
 
 async function loadPresetsList() {
   try {
-    const res = await fetch('/public/presets.json');
+    const res = await fetch('/presets.json');
     const data = await res.json();
     const accordion = document.getElementById('presets-accordion');
     
@@ -531,7 +531,7 @@ async function spawnObject(presetUrl, gridPos, rotation = [0,0,0], existingId = 
   }
   
   // load the preset
-  const res = await fetch(`/public/presets/${presetUrl}`);
+  const res = await fetch(`/presets/${presetUrl}`);
   const def = await res.json();
   
   const ent = new VoxelEntity(def);
