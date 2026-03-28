@@ -3,6 +3,18 @@
     "genre": "RPG Characters",
     "items": [
       {
+        "label": "🧑 Archer",
+        "name": "Archer",
+        "type": "humanoid",
+        "url": "/presets/RPG_Characters/Archer.json"
+      },
+      {
+        "label": "🐾 Bat",
+        "name": "Bat",
+        "type": "quadruped",
+        "url": "/presets/RPG_Characters/Bat.json"
+      },
+      {
         "label": "🐦 Bird",
         "name": "Bird",
         "type": "quadruped",
@@ -27,10 +39,22 @@
         "url": "/presets/RPG_Characters/Dog.json"
       },
       {
+        "label": "🧑 King",
+        "name": "King",
+        "type": "humanoid",
+        "url": "/presets/RPG_Characters/King.json"
+      },
+      {
         "label": "⚔️ Knight",
         "name": "Knight",
         "type": "humanoid",
         "url": "/presets/RPG_Characters/Knight.json"
+      },
+      {
+        "label": "🧑 Mage",
+        "name": "Mage",
+        "type": "humanoid",
+        "url": "/presets/RPG_Characters/Mage.json"
       },
       {
         "label": "💀 Skeleton",
@@ -49,6 +73,18 @@
   {
     "genre": "RPG Props",
     "items": [
+      {
+        "label": "📦 Anvil",
+        "name": "Anvil",
+        "type": "prop",
+        "url": "/presets/RPG_Props/Anvil.json"
+      },
+      {
+        "label": "📦 Banner",
+        "name": "Banner",
+        "type": "prop",
+        "url": "/presets/RPG_Props/Banner.json"
+      },
       {
         "label": "🛢️ Barrel",
         "name": "Barrel",
@@ -98,10 +134,22 @@
         "url": "/presets/RPG_Props/Street%20Light.json"
       },
       {
+        "label": "📦 Tent",
+        "name": "Tent",
+        "type": "prop",
+        "url": "/presets/RPG_Props/Tent.json"
+      },
+      {
         "label": "🌳 Tree",
         "name": "Tree",
         "type": "static",
         "url": "/presets/RPG_Props/Tree.json"
+      },
+      {
+        "label": "📦 Well",
+        "name": "Well",
+        "type": "prop",
+        "url": "/presets/RPG_Props/Well.json"
       }
     ]
   },
@@ -121,10 +169,28 @@
         "url": "/presets/TD_Bases_and_Traps/Castle%20Base.json"
       },
       {
+        "label": "📦 Catapult",
+        "name": "Catapult",
+        "type": "prop",
+        "url": "/presets/TD_Bases_and_Traps/Catapult.json"
+      },
+      {
         "label": "💰 Gold Mine",
         "name": "Gold Mine",
         "type": "static",
         "url": "/presets/TD_Bases_and_Traps/Gold%20Mine.json"
+      },
+      {
+        "label": "📦 Spike Trap",
+        "name": "Spike Trap",
+        "type": "prop",
+        "url": "/presets/TD_Bases_and_Traps/Spike%20Trap.json"
+      },
+      {
+        "label": "📦 Stone Wall",
+        "name": "Stone Wall",
+        "type": "prop",
+        "url": "/presets/TD_Bases_and_Traps/Stone%20Wall.json"
       }
     ]
   },
@@ -138,6 +204,12 @@
         "url": "/presets/TD_Enemies/Gargoyle.json"
       },
       {
+        "label": "🐾 Giant Spider",
+        "name": "Giant Spider",
+        "type": "quadruped",
+        "url": "/presets/TD_Enemies/Giant%20Spider.json"
+      },
+      {
         "label": "🟢 Goblin",
         "name": "Goblin",
         "type": "humanoid",
@@ -148,6 +220,12 @@
         "name": "Orc",
         "type": "humanoid",
         "url": "/presets/TD_Enemies/Orc.json"
+      },
+      {
+        "label": "🧑 Troll",
+        "name": "Troll",
+        "type": "humanoid",
+        "url": "/presets/TD_Enemies/Troll.json"
       }
     ]
   },
@@ -167,10 +245,28 @@
         "url": "/presets/TD_Towers/Cannon%20Tower.json"
       },
       {
+        "label": "📦 Ice Tower",
+        "name": "Ice Tower",
+        "type": "tower",
+        "url": "/presets/TD_Towers/Ice%20Tower.json"
+      },
+      {
+        "label": "📦 Laser Tower",
+        "name": "Laser Tower",
+        "type": "tower",
+        "url": "/presets/TD_Towers/Laser%20Tower.json"
+      },
+      {
         "label": "🔮 Magic Tower",
         "name": "Magic Tower",
         "type": "static",
         "url": "/presets/TD_Towers/Magic%20Tower.json"
+      },
+      {
+        "label": "📦 Poison Tower",
+        "name": "Poison Tower",
+        "type": "tower",
+        "url": "/presets/TD_Towers/Poison%20Tower.json"
       }
     ]
   }
