@@ -1198,7 +1198,7 @@
       "name": "frontRightLeg",
       "parent": "body",
       "position": [
-        -1,
+        -1.5,
         -1.5,
         -3
       ],
@@ -1238,7 +1238,7 @@
       "name": "frontLeftLeg",
       "parent": "body",
       "position": [
-        2,
+        1.5,
         -1.5,
         -3
       ],
@@ -1278,7 +1278,7 @@
       "name": "backRightLeg",
       "parent": "body",
       "position": [
-        -1,
+        -1.5,
         -1.5,
         3
       ],
@@ -1318,7 +1318,7 @@
       "name": "backLeftLeg",
       "parent": "body",
       "position": [
-        2,
+        1.5,
         -1.5,
         3
       ],
@@ -1359,7 +1359,7 @@
       "parent": "body",
       "position": [
         0,
-        2,
+        1.5,
         4
       ],
       "center": [

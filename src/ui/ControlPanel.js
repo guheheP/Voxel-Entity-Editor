@@ -85,15 +85,59 @@ export class ControlPanel {
     this._currentEntityBtn = null;
 
     groups.forEach((group, groupIdx) => {
+      const groupDiv = document.createElement('div');
+      groupDiv.style.marginBottom = '6px';
+
       const header = document.createElement('div');
-      header.textContent = group.genre;
-      header.style.margin = '16px 0 8px 6px';
-      header.style.color = 'var(--text-muted)';
+      header.style.padding = '6px 4px';
+      header.style.color = 'var(--text-primary)';
       header.style.fontSize = '12px';
-      header.style.fontWeight = 'bold';
+      header.style.fontWeight = '700';
       header.style.textTransform = 'uppercase';
       header.style.letterSpacing = '1px';
-      this.entityList.appendChild(header);
+      header.style.cursor = 'pointer';
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.userSelect = 'none';
+      header.style.background = 'rgba(255, 255, 255, 0.04)';
+      header.style.borderRadius = '6px';
+
+      header.addEventListener('mouseenter', () => header.style.background = 'rgba(255, 255, 255, 0.08)');
+      header.addEventListener('mouseleave', () => header.style.background = 'rgba(255, 255, 255, 0.04)');
+
+      const isFirst = groupIdx === 0;
+      
+      const caret = document.createElement('span');
+      caret.textContent = isFirst ? '▼' : '▶';
+      caret.style.fontSize = '10px';
+      caret.style.marginRight = '8px';
+      caret.style.color = 'var(--accent)';
+      
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = group.genre;
+
+      header.appendChild(caret);
+      header.appendChild(titleSpan);
+
+      const contentWrapper = document.createElement('div');
+      contentWrapper.style.display = isFirst ? 'flex' : 'none';
+      contentWrapper.style.flexDirection = 'column';
+      contentWrapper.style.gap = '4px';
+      contentWrapper.style.marginTop = '4px';
+      contentWrapper.style.paddingLeft = '6px';
+
+      header.addEventListener('click', () => {
+        const isExpanded = contentWrapper.style.display !== 'none';
+        if (isExpanded) {
+          contentWrapper.style.display = 'none';
+          caret.textContent = '▶';
+        } else {
+          contentWrapper.style.display = 'flex';
+          caret.textContent = '▼';
+        }
+      });
+
+      groupDiv.appendChild(header);
 
       group.items.forEach((item, itemIdx) => {
         const btn = document.createElement('button');
@@ -111,8 +155,11 @@ export class ControlPanel {
           this._currentEntityBtn = btn;
         }
 
-        this.entityList.appendChild(btn);
+        contentWrapper.appendChild(btn);
       });
+
+      groupDiv.appendChild(contentWrapper);
+      this.entityList.appendChild(groupDiv);
     });
   }
 

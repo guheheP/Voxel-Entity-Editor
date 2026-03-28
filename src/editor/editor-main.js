@@ -160,7 +160,7 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 5;
 controls.maxDistance = 80;
-controls.maxPolarAngle = Math.PI / 2 - 0.05;
+controls.maxPolarAngle = Math.PI;
 
 // Disable orbit controls on left-click when tools are active
 controls.mouseButtons = {

@@ -854,7 +854,7 @@
       "name": "leftWing",
       "parent": "body",
       "position": [
-        4,
+        2,
         1,
         0
       ],
@@ -894,7 +894,7 @@
       "name": "rightLeg",
       "parent": "body",
       "position": [
-        0.5,
+        -1,
         -1.5,
         0.5
       ],
@@ -922,7 +922,7 @@
       "name": "leftLeg",
       "parent": "body",
       "position": [
-        2.5,
+        1,
         -1.5,
         0.5
       ],
@@ -1080,6 +1080,11 @@
                 0,
                 0,
                 -0.5
+              ],
+              "position": [
+                0,
+                0,
+                0
               ]
             },
             "leftWing": {
@@ -1087,12 +1092,31 @@
                 0,
                 0,
                 0.5
+              ],
+              "position": [
+                0,
+                0,
+                0
               ]
             },
             "body": {
               "position": [
                 0,
                 0.5,
+                0
+              ]
+            },
+            "rightLeg": {
+              "rotation": [
+                0,
+                0,
+                0
+              ]
+            },
+            "head": {
+              "rotation": [
+                0,
+                0,
                 0
               ]
             }

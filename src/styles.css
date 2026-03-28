@@ -107,6 +107,9 @@ body {
   top: 24px;
   right: 24px;
   width: 260px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
   padding: 20px;
   background: var(--bg-panel);
   backdrop-filter: blur(16px);
@@ -129,6 +132,24 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+}
+
+.entity-list::-webkit-scrollbar {
+  width: 4px;
+}
+.entity-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+.entity-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+.entity-list::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 .entity-btn {
