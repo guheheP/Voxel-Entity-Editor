@@ -68,7 +68,8 @@ export class AnimationController {
     }
 
     const t = this.time / dur; // 0..1 normalized
-    const currentTransforms = this._interpolate(this.currentDef.keyframes, t);
+    const maxKTime = this.currentDef.keyframes.length > 0 ? this.currentDef.keyframes[this.currentDef.keyframes.length - 1].time : 1;
+    const currentTransforms = this._interpolate(this.currentDef.keyframes, t * maxKTime);
 
     // Handle blending
     if (this.blending) {
@@ -79,7 +80,8 @@ export class AnimationController {
       if (this.prevDef) {
         const prevDur = this.prevDef.duration || 1;
         const prevT = this.prevTime / prevDur;
-        const prevTransforms = this._interpolate(this.prevDef.keyframes, prevT);
+        const prevMaxKTime = this.prevDef.keyframes.length > 0 ? this.prevDef.keyframes[this.prevDef.keyframes.length - 1].time : 1;
+        const prevTransforms = this._interpolate(this.prevDef.keyframes, prevT * prevMaxKTime);
         const blended = this._blendTransforms(prevTransforms, currentTransforms, smoothT);
 
         if (blendT >= 1) {
@@ -171,7 +173,8 @@ export class AnimationController {
     this.time = normalizedTime * (this.currentDef.duration || 1);
     this.playing = false;
     this.blending = false;
-    return this._interpolate(this.currentDef.keyframes, normalizedTime);
+    const maxKTime = this.currentDef.keyframes.length > 0 ? this.currentDef.keyframes[this.currentDef.keyframes.length - 1].time : 1;
+    return this._interpolate(this.currentDef.keyframes, normalizedTime * maxKTime);
   }
 
   /**
@@ -182,6 +185,7 @@ export class AnimationController {
    */
   getTransformsAt(animDef, normalizedTime) {
     if (!animDef || !animDef.keyframes) return {};
-    return this._interpolate(animDef.keyframes, normalizedTime);
+    const maxKTime = animDef.keyframes.length > 0 ? animDef.keyframes[animDef.keyframes.length - 1].time : 1;
+    return this._interpolate(animDef.keyframes, normalizedTime * maxKTime);
   }
 }
