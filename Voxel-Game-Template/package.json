@@ -1,0 +1,16 @@
+{
+  "name": "voxel-game",
+  "version": "1.0.0",
+  "description": "Voxel Game — Built with Boxel Voxel Engine",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
